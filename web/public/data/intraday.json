@@ -1,0 +1,235 @@
+{
+  "asOf": "2026-08-31T09:29:59+08:00",
+  "indices": {
+    "sh000001": {
+      "name": "上证指数",
+      "price": 3926.53,
+      "last_close": 3952.18,
+      "open": 3926.53,
+      "change_pct": -0.65,
+      "high": 3926.53,
+      "low": 3926.53,
+      "amount_wan": 1233842.0,
+      "turnover_pct": 0.02,
+      "pe_ttm": 17.09,
+      "mcap_yi": 696905.59,
+      "pb": 0.0,
+      "limit_up": -1.0,
+      "limit_down": -1.0,
+      "vol_ratio": 0.0
+    },
+    "sz399001": {
+      "name": "深证成指",
+      "price": 13764.41,
+      "last_close": 13953.07,
+      "open": 13764.41,
+      "change_pct": -1.35,
+      "high": 13764.41,
+      "low": 13764.41,
+      "amount_wan": 1340520.0,
+      "turnover_pct": 0.04,
+      "pe_ttm": 42.27,
+      "mcap_yi": 442555.65,
+      "pb": 0.0,
+      "limit_up": -1.0,
+      "limit_down": -1.0,
+      "vol_ratio": 0.0
+    },
+    "sh000300": {
+      "name": "沪深300",
+      "price": 4561.99,
+      "last_close": 4609.18,
+      "open": 4561.99,
+      "change_pct": -1.02,
+      "high": 4561.99,
+      "low": 4561.99,
+      "amount_wan": 705060.0,
+      "turnover_pct": 0.01,
+      "pe_ttm": 13.59,
+      "mcap_yi": 548396.34,
+      "pb": 0.0,
+      "limit_up": -1.0,
+      "limit_down": -1.0,
+      "vol_ratio": 0.0
+    }
+  },
+  "sentiment": {
+    "limit_up_count": 19,
+    "broken_count": 0,
+    "break_rate": 0.0,
+    "limit_down_count": 5,
+    "max_height": 6,
+    "ladder": {
+      "2": 8,
+      "1": 7,
+      "6": 1,
+      "5": 1,
+      "3": 2
+    }
+  },
+  "industryFunds": [],
+  "conceptFunds": [],
+  "highBoards": [
+    {
+      "code": "002084",
+      "name": "海鸥住工",
+      "price": 6.38,
+      "pct": 10.0,
+      "turnover": 0.5044186115264893,
+      "industry": "家居用品",
+      "limit_days": 6,
+      "seal_fund": 797470294,
+      "break_times": 0,
+      "first_seal": 92500
+    },
+    {
+      "code": "600371",
+      "name": "万向德农",
+      "price": 12.69,
+      "pct": 9.965337753295898,
+      "turnover": 0.2618754804134369,
+      "industry": "种植业",
+      "limit_days": 5,
+      "seal_fund": 537590403,
+      "break_times": 0,
+      "first_seal": 92500
+    },
+    {
+      "code": "600540",
+      "name": "新赛股份",
+      "price": 5.56,
+      "pct": 10.099010467529297,
+      "turnover": 0.29712235927581787,
+      "industry": "种植业",
+      "limit_days": 3,
+      "seal_fund": 889372590,
+      "break_times": 0,
+      "first_seal": 92504
+    },
+    {
+      "code": "600162",
+      "name": "香江控股",
+      "price": 5.9,
+      "pct": 10.074626922607422,
+      "turnover": 0.2636645436286926,
+      "industry": "房地产开",
+      "limit_days": 3,
+      "seal_fund": 237548679,
+      "break_times": 0,
+      "first_seal": 92504
+    },
+    {
+      "code": "000560",
+      "name": "我爱我家",
+      "price": 2.9,
+      "pct": 9.848484992980957,
+      "turnover": 0.5575304627418518,
+      "industry": "房地产服",
+      "limit_days": 2,
+      "seal_fund": 2339842681,
+      "break_times": 0,
+      "first_seal": 92500
+    },
+    {
+      "code": "000011",
+      "name": "深物业A",
+      "price": 10.07,
+      "pct": 10.054644584655762,
+      "turnover": 0.4742932617664337,
+      "industry": "房地产开",
+      "limit_days": 2,
+      "seal_fund": 533900947,
+      "break_times": 0,
+      "first_seal": 92500
+    },
+    {
+      "code": "002679",
+      "name": "福建金森",
+      "price": 11.74,
+      "pct": 10.028116226196289,
+      "turnover": 0.9093533158302307,
+      "industry": "林业Ⅱ",
+      "limit_days": 2,
+      "seal_fund": 359486372,
+      "break_times": 0,
+      "first_seal": 92500
+    },
+    {
+      "code": "000716",
+      "name": "黑芝麻",
+      "price": 6.24,
+      "pct": 10.052909851074219,
+      "turnover": 3.8260481357574463,
+      "industry": "休闲食品",
+      "limit_days": 2,
+      "seal_fund": 219374313,
+      "break_times": 0,
+      "first_seal": 93000
+    },
+    {
+      "code": "601086",
+      "name": "国芳集团",
+      "price": 9.17,
+      "pct": 9.952038764953613,
+      "turnover": 0.3573153018951416,
+      "industry": "一般零售",
+      "limit_days": 2,
+      "seal_fund": 217111487,
+      "break_times": 0,
+      "first_seal": 92502
+    },
+    {
+      "code": "002918",
+      "name": "蒙娜丽莎",
+      "price": 12.46,
+      "pct": 9.97352123260498,
+      "turnover": 3.1420373916625977,
+      "industry": "家居用品",
+      "limit_days": 2,
+      "seal_fund": 52165036,
+      "break_times": 0,
+      "first_seal": 93003
+    },
+    {
+      "code": "603086",
+      "name": "先达股份",
+      "price": 6.96,
+      "pct": 9.952607154846191,
+      "turnover": 1.8235481977462769,
+      "industry": "农化制品",
+      "limit_days": 2,
+      "seal_fund": 12207652,
+      "break_times": 0,
+      "first_seal": 93001
+    },
+    {
+      "code": "600354",
+      "name": "敦煌种业",
+      "price": 9.03,
+      "pct": 9.98781967163086,
+      "turnover": 2.3897976875305176,
+      "industry": "种植业",
+      "limit_days": 2,
+      "seal_fund": 11450924,
+      "break_times": 0,
+      "first_seal": 93001
+    }
+  ],
+  "brokenBoards": [],
+  "watchlist": [],
+  "errors": {
+    "industry_fund_flow": "RemoteDisconnected: Remote end closed connection without response",
+    "concept_fund_flow": "RemoteDisconnected: Remote end closed connection without response"
+  },
+  "rules": {
+    "market": "沪深主板",
+    "maxPrice": 35,
+    "exclude": [
+      "科创板",
+      "创业板",
+      "北交所",
+      "ST",
+      "退市整理"
+    ]
+  }
+}

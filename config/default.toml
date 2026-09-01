@@ -1,0 +1,31 @@
+[data]
+database = "data/aquant.db"
+history_start = "2023-01-01"
+request_timeout_seconds = 20
+request_retries = 5
+sync_workers = 3
+
+[universe]
+main_board_only = true
+exclude_st = true
+min_listing_days = 120
+max_price = 35.0
+min_average_amount_20 = 50000000.0
+
+[strategy]
+top_n = 10
+sector_top_n = 5
+sector_candidate_top_n = 10
+min_sector_members = 3
+
+# These are heuristic ranking weights, not probabilities.
+sector_weight = 0.30
+momentum_20_weight = 0.15
+momentum_60_weight = 0.10
+relative_strength_weight = 0.10
+volume_weight = 0.15
+breakout_weight = 0.10
+trend_quality_weight = 0.10
+
+[report]
+directory = "reports"

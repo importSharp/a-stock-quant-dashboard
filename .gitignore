@@ -1,0 +1,29 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+.env.*
+!.env.example
+data/*.db
+data/*.db-*
+reports/*.md
+reports/*.csv
+reports/*.json
+logs/*.log
+logs/*.pid
+data/runtime/
+.pnpm-store/
+
+# Frontend dependencies and build output
+web/node_modules/
+web/.next/
+web/.vinext/
+web/dist/
+web/.wrangler/
+web/outputs/
+web/work/
+
+# Generated market snapshots; refreshed after startup
+web/public/data/a-stock-data.json
+web/public/data/klines/

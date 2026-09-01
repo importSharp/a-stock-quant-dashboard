@@ -1,0 +1,18 @@
+{
+  "name": "a-stock-data A股工作台",
+  "short_name": "A股工作台",
+  "description": "a-stock-data 实时市场、板块、打板与个股分析工作台",
+  "start_url": "/?pwa=3",
+  "display": "standalone",
+  "background_color": "#f3f5f8",
+  "theme_color": "#10151c",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
