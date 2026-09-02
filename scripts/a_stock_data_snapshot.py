@@ -12,6 +12,7 @@ from pathlib import Path
 import re
 from typing import Any, Callable
 
+from daily_pick import market_phase, rank_candidates, resolve_daily_pick
 from intraday_skill_analysis import (
     board_candidates,
     board_fund_flow,
@@ -19,6 +20,7 @@ from intraday_skill_analysis import (
     eastmoney_global_news,
     industry_comparison,
     limit_pools,
+    opening_minutes,
     tencent_quotes,
     ths_hot,
 )
@@ -182,6 +184,28 @@ def main() -> int:
             for name, rows in sorted(broken_by_industry.items(), key=lambda item: len(item[1]), reverse=True)[:6]
         ]
 
+    candidate_groups = result["boardCandidates"] or result["themeCandidates"]
+    candidate_codes = sorted({str(row.get("code")) for group in candidate_groups for row in group.get("rows") or [] if row.get("code")})
+    candidate_quotes = collect(
+        "candidateQuotes", "候选实时行情", "腾讯行情",
+        lambda: tencent_quotes(candidate_codes), {},
+    ) if candidate_codes else {}
+    for group in candidate_groups:
+        for row in group.get("rows") or []:
+            quote = candidate_quotes.get(str(row.get("code"))) or {}
+            if not quote:
+                continue
+            row.update({
+                "name": quote.get("name") or row.get("name"),
+                "price": quote.get("price") or row.get("price"),
+                "pct": quote.get("change_pct", row.get("pct", 0)),
+                "open": quote.get("open", 0), "high": quote.get("high", 0), "low": quote.get("low", 0),
+                "limit_up": quote.get("limit_up", 0), "limit_down": quote.get("limit_down", 0),
+                "turnover": quote.get("turnover_pct") or row.get("turnover", 0),
+                "vol_ratio": quote.get("vol_ratio") or row.get("vol_ratio", 0),
+                "amount_yi": round(float(quote.get("amount_wan") or 0) / 10000, 2) or row.get("amount_yi", 0),
+            })
+
     pools = result.get("pools") or {}
     up = pools.get("limit_up") or []
     broken = pools.get("broken") or []
@@ -193,8 +217,46 @@ def main() -> int:
         "maxHeight": max((int(row.get("limit_days") or 0) for row in up), default=0),
     }
 
+    state_dir = ROOT / "data" / "runtime"
+    state_path = state_dir / f"daily-pick-{now:%Y%m%d}.json"
+    minute_bars: dict[str, list[dict[str, Any]]] = {}
+    if market_phase(now) == "generation" and not state_path.exists():
+        minute_errors = []
+        for candidate in rank_candidates(result)[:12]:
+            code = str(candidate.get("code") or "")
+            try:
+                bars = opening_minutes(code, now.strftime("%Y-%m-%d"))
+                if bars:
+                    minute_bars[code] = bars
+                else:
+                    minute_errors.append(f"{code}: 无开盘分钟数据")
+            except Exception as exc:
+                minute_errors.append(f"{code}: {type(exc).__name__}: {exc}")
+        result["endpointStatus"].append({
+            "key": "openingMinutes", "label": "开盘5分钟量价", "source": "新浪分钟K线",
+            "status": "ok" if minute_bars else "error", "count": len(minute_bars),
+            "updatedAt": datetime.now().astimezone().isoformat(timespec="seconds"),
+            **({"error": "；".join(minute_errors[:3])} if minute_errors else {}),
+        })
+
+    live_prices: dict[str, float] = {}
+    if state_path.exists():
+        try:
+            frozen = json.loads(state_path.read_text(encoding="utf-8"))
+            frozen_codes = [str(row.get("code")) for row in (frozen.get("core") or []) + (frozen.get("watch") or []) if row.get("code")]
+            frozen_quotes = tencent_quotes(frozen_codes) if frozen_codes else {}
+            live_prices = {code: float(quote.get("price") or 0) for code, quote in frozen_quotes.items()}
+        except Exception as exc:
+            result["endpointStatus"].append({
+                "key": "dailyPickQuotes", "label": "固定候选现价", "source": "腾讯行情", "status": "error", "count": 0,
+                "updatedAt": datetime.now().astimezone().isoformat(timespec="seconds"), "error": f"{type(exc).__name__}: {exc}",
+            })
+    result["dailyPick"] = resolve_daily_pick(result, now, state_dir, minute_bars, live_prices)
+
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary = OUTPUT.with_suffix(OUTPUT.suffix + ".tmp")
+    temporary.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(OUTPUT)
     print(OUTPUT)
     return 0
 

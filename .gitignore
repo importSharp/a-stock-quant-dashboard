@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.pytest-tmp/
+.testdeps/
+*.bundle
 .env
 .env.*
 !.env.example

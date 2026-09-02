@@ -119,6 +119,33 @@ def tencent_quotes(codes: list[str]) -> dict[str, dict[str, Any]]:
     return out
 
 
+def opening_minutes(code: str, date: str) -> list[dict[str, Any]]:
+    """Return the first five one-minute bars for a trading date from Sina."""
+    symbol = code.lower()
+    if not symbol.startswith(("sh", "sz", "bj")):
+        symbol = ("sh" if code.startswith(("5", "6", "9")) else "sz") + code
+    body = _get_json(
+        "https://quotes.sina.cn/cn/api/openapi.php/CN_MarketDataService.getKLineData",
+        {"symbol": symbol, "scale": 1, "ma": "no", "datalen": 30},
+        referer="https://finance.sina.com.cn/",
+    )
+    rows = ((body.get("result") or {}).get("data") or []) if isinstance(body, dict) else []
+    selected = []
+    for item in rows:
+        stamp = str(item.get("day") or item.get("date") or "")
+        if date not in stamp or not re.search(r"09:3[0-5]", stamp):
+            continue
+        selected.append({
+            "time": stamp,
+            "open": float(item.get("open") or 0),
+            "high": float(item.get("high") or 0),
+            "low": float(item.get("low") or 0),
+            "close": float(item.get("close") or 0),
+            "volume": float(item.get("volume") or 0),
+        })
+    return sorted(selected, key=lambda item: item["time"])[:5]
+
+
 def industry_comparison(top_n: int = 15) -> list[dict[str, Any]]:
     data = _get_json(
         "https://push2.eastmoney.com/api/qt/clist/get",

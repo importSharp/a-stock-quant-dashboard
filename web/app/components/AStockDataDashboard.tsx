@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { DailyPicks, type DailyPick } from "./DailyPicks";
 
 type AnyRow = Record<string, any>;
 type Snapshot = {
@@ -15,6 +16,7 @@ type Snapshot = {
   boardCandidates: { name: string; code: string; rows: AnyRow[] }[];
   themeCandidates: { name: string; code: string; source: string; rows: AnyRow[] }[];
   hot: AnyRow[];
+  dailyPick?: DailyPick;
 };
 
 const tabs = ["竞价", "盘中", "板块", "候选"] as const;
@@ -128,6 +130,8 @@ export function AStockDataDashboard() {
         <p><i /> a-stock-data v{data?.meta?.version || "3.7.1"} · 自动刷新</p>
       </div>
     </section>
+
+    <DailyPicks pick={data?.dailyPick} asOf={data?.meta?.asOf} />
 
     {error ? <div className="asd-alert">{error}</div> : null}
     {failures.length ? <details className="asd-alert warn"><summary><strong>{failures.length} 个端点暂不可用</strong><span>点击查看</span></summary><div>{failures.map((item) => <span key={item.key}>{item.label}：{item.error}</span>)}</div></details> : null}
