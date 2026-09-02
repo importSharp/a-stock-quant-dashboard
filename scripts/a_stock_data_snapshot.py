@@ -12,7 +12,7 @@ from pathlib import Path
 import re
 from typing import Any, Callable
 
-from daily_pick import market_phase, rank_candidates, resolve_daily_pick
+from daily_pick import is_untouched_limit_candidate, market_phase, rank_candidates, resolve_daily_pick
 from intraday_skill_analysis import (
     board_candidates,
     board_fund_flow,
@@ -132,6 +132,8 @@ def main() -> int:
                 "turnover": quote.get("turnover_pct", row.get("turnover", 0)),
                 "vol_ratio": quote.get("vol_ratio", 0),
                 "amount_yi": round(float(quote.get("amount_wan", 0)) / 10000, 2),
+                "open": quote.get("open", 0), "high": quote.get("high", 0), "low": quote.get("low", 0),
+                "limit_up": quote.get("limit_up", 0), "limit_down": quote.get("limit_down", 0),
             })
     result["news"] = {
         "cls": collect("clsNews", "财联社电报", "财联社", lambda: cls_telegraph(30), []),
@@ -205,6 +207,16 @@ def main() -> int:
                 "vol_ratio": quote.get("vol_ratio") or row.get("vol_ratio", 0),
                 "amount_yi": round(float(quote.get("amount_wan") or 0) / 10000, 2) or row.get("amount_yi", 0),
             })
+
+    blocked_codes = {
+        str(row.get("code"))
+        for row in ((result.get("pools") or {}).get("limit_up") or []) + ((result.get("pools") or {}).get("broken") or [])
+    }
+    for group in candidate_groups:
+        group["rows"] = [
+            row for row in group.get("rows") or []
+            if is_untouched_limit_candidate(row, blocked_codes)
+        ]
 
     pools = result.get("pools") or {}
     up = pools.get("limit_up") or []

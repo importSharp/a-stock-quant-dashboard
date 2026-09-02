@@ -18,6 +18,9 @@ export type DailyPickRow = {
   confirmedPrice: number;
   currentPrice: number;
   changePct: number;
+  limitPrice: number;
+  distanceToLimit: number;
+  untouchedAtSelection: boolean;
   liveState: string;
   reasons: string[];
   scoreBreakdown: Record<string, number>;
@@ -68,14 +71,14 @@ export function DailyPicks({ pick, asOf }: { pick?: DailyPick; asOf?: string }) 
   if (!pick || pick.status !== "selected") {
     const label = pick?.status === "waiting" ? "WAITING FOR 09:35" : pick?.status === "market_closed" ? "MARKET CLOSED" : "NO QUALIFIED PICK";
     return <section className="daily-picks daily-empty">
-      <div><span className="asd-kicker">{label}</span><h2>9:35 今日研究候选</h2><p>{pick?.message || "正在等待行情快照。"}</p></div>
+      <div><span className="asd-kicker">{label}</span><h2>9:35 未触板涨停候选</h2><p>{pick?.message || "正在等待行情快照。"}</p></div>
       <aside><strong>3 + 2</strong><span>最多3只核心 · 2只观察<br />数据不完整时不强行推荐</span></aside>
     </section>;
   }
   const rows = [...pick.core, ...pick.watch];
   return <section className="daily-picks">
     <header className="daily-picks-title">
-      <div><span className="asd-kicker">FROZEN DAILY SHORTLIST</span><h2>9:35 今日研究候选</h2><p>名单当日固定，盘中只更新价格状态。进入区间不等于必须成交。</p></div>
+      <div><span className="asd-kicker">FROZEN DAILY SHORTLIST</span><h2>9:35 未触板涨停候选</h2><p>只选生成时尚未触板、距涨停不超过8%的股票；名单当日固定，盘中只更新价格状态。</p></div>
       <div><strong>{pick.core.length}</strong><span>核心</span><i>+</i><strong>{pick.watch.length}</strong><span>观察</span></div>
     </header>
     {rows.length ? <div className="daily-picks-grid">

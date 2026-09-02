@@ -53,7 +53,19 @@ def source_errors(snapshot: dict[str, Any]) -> list[str]:
     return errors
 
 
-def _eligible(row: dict[str, Any], broken: set[str]) -> bool:
+def is_untouched_limit_candidate(row: dict[str, Any], blocked: set[str] | None = None) -> bool:
+    """Return true only when the stock is still tradable and has never touched limit-up today."""
+    code = str(row.get("code") or "")
+    price = _number(row.get("price"))
+    high = _number(row.get("high"))
+    limit_up = _number(row.get("limit_up"))
+    if code in (blocked or set()) or price <= 0 or high <= 0 or limit_up <= 0:
+        return False
+    distance = (limit_up / price - 1.0) * 100
+    return price < limit_up - 0.001 and high < limit_up - 0.001 and 0 < distance <= 8.0
+
+
+def _eligible(row: dict[str, Any], blocked: set[str]) -> bool:
     code = str(row.get("code") or "")
     name = str(row.get("name") or "")
     price = _number(row.get("price"))
@@ -63,7 +75,7 @@ def _eligible(row: dict[str, Any], broken: set[str]) -> bool:
         MAIN_BOARD.fullmatch(code)
         and "ST" not in name.upper()
         and "退" not in name
-        and code not in broken
+        and is_untouched_limit_candidate(row, blocked)
         and 0 < price <= 35
         and 1.0 <= pct <= 7.5
         and _number(row.get("vol_ratio")) >= 1.2
@@ -116,7 +128,11 @@ def rank_candidates(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
                 if sector not in current["sectors"]:
                     current["sectors"].append(sector)
         rows = list(merged.values())
-    broken = {str(item.get("code")) for item in (snapshot.get("pools") or {}).get("broken") or []}
+    pools = snapshot.get("pools") or {}
+    blocked = {
+        str(item.get("code"))
+        for item in (pools.get("limit_up") or []) + (pools.get("broken") or [])
+    }
     sector_counts = Counter(str(row.get("sector") or (row.get("sectors") or ["热点题材"])[0]) for row in rows)
     break_rate = _number((snapshot.get("sentiment") or {}).get("breakRate"))
     ranked = []
@@ -124,7 +140,7 @@ def rank_candidates(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
         row = dict(row)
         sector = str(row.get("sector") or (row.get("sectors") or ["热点题材"])[0])
         row["sector"] = sector
-        if not _eligible(row, broken):
+        if not _eligible(row, blocked):
             continue
         score, breakdown = _score(row, int(row.get("sectorRank", index)), sector_counts[sector], break_rate)
         if score < 60:
@@ -178,17 +194,21 @@ def _live_state(price: float, levels: dict[str, Any]) -> str:
 
 def _present(row: dict[str, Any], rank: int, tier: str, levels: dict[str, Any]) -> dict[str, Any]:
     price = _number(row.get("price"))
+    limit_up = _number(row.get("limit_up"))
+    distance_to_limit = (limit_up / price - 1.0) * 100 if price > 0 and limit_up > 0 else 0.0
     breakdown = row.get("scoreBreakdown") or {}
     reasons = [
         f"{row.get('sector', '热点题材')}联动，板块研究得分 {breakdown.get('板块', 0)}",
-        f"9:35 涨幅 { _number(row.get('pct', row.get('change_pct'))):.2f}% · 量比 {_number(row.get('vol_ratio')):.2f}",
+        f"当日尚未触板 · 距涨停 {distance_to_limit:.2f}% · 9:35 涨幅 {_number(row.get('pct', row.get('change_pct'))):.2f}%",
         f"换手 {_number(row.get('turnover', row.get('turnover_pct'))):.2f}% · 成交 {_number(row.get('amount_yi', _number(row.get('amount_wan')) / 10000)):.2f}亿",
     ]
     return {
         "rank": rank, "tier": tier, "code": str(row.get("code")), "name": str(row.get("name")),
         "sector": str(row.get("sector")), "score": round(_number(row.get("score")), 1),
         "scoreBreakdown": breakdown, "confirmedPrice": price, "currentPrice": price,
-        "changePct": _number(row.get("pct", row.get("change_pct"))), "priceLevels": levels,
+        "changePct": _number(row.get("pct", row.get("change_pct"))),
+        "limitPrice": round(limit_up, 2), "distanceToLimit": round(distance_to_limit, 2),
+        "untouchedAtSelection": True, "priceLevels": levels,
         "liveState": _live_state(price, levels), "reasons": reasons,
     }
 
@@ -234,7 +254,7 @@ def build_daily_pick(snapshot: dict[str, Any], now: datetime, minute_bars: dict[
         "date": now.date().isoformat(), "generatedAt": now.isoformat(timespec="seconds"),
         "status": "selected", "message": f"已固定 {len(core)} 只核心、{len(watch)} 只观察候选。",
         "frozen": True, "core": core, "watch": watch,
-        "disclosure": "可解释规则研究排序，不是上涨概率或个性化买入建议。",
+        "disclosure": "仅筛选生成时尚未触板且距涨停不超过8%的股票；研究分不是涨停概率或个性化买入建议。",
     }
 
 

@@ -122,7 +122,7 @@ export function AStockDataDashboard() {
     </header>
 
     <section className="asd-contract">
-      <div className="asd-hero-copy"><span className="asd-kicker">FOUR CORE WORKSPACES</span><h2>只看最影响交易的，<em>四组实时信号。</em></h2><p>9:15～9:25集合竞价、盘中涨停与炸板、强势板块排名、每个强势板块候选前10。</p><div className="asd-hero-tags"><span>沪深主板</span><span>价格 ≤ 35</span><span>排除 ST / 退市</span><span>15秒读取快照</span></div></div>
+      <div className="asd-hero-copy"><span className="asd-kicker">FOUR CORE WORKSPACES</span><h2>只看最影响交易的，<em>四组实时信号。</em></h2><p>9:15～9:25集合竞价、盘中涨停与炸板、强势板块排名、每个强势板块未触板候选前10。</p><div className="asd-hero-tags"><span>沪深主板</span><span>价格 ≤ 35</span><span>排除 ST / 退市</span><span>排除涨停 / 炸板</span></div></div>
       <div className="asd-live-summary">
         <div><small>涨停</small><strong className="up">{data?.sentiment?.limitUp ?? "—"}</strong><span>只</span></div>
         <div><small>炸板率</small><strong>{data?.sentiment?.breakRate ?? "—"}</strong><span>%</span></div>
@@ -173,7 +173,7 @@ export function AStockDataDashboard() {
       </section>
     </>}
 
-    {tab === "候选" && <section className="asd-panel"><div className="asd-title"><div><span className="asd-kicker">TOP 10 PER STRONG BOARD</span><h2>强势板块候选前10</h2></div><Source>{data?.boardCandidates?.length ? "东方财富板块成分" : "同花顺题材归因 + 腾讯行情"}</Source></div>{candidateBoards.length ? <div className="asd-board-grid">{candidateBoards.map((board) => <article key={board.code + "-" + board.name}><h3>{board.name}<small>{board.code}</small></h3><StockRows rows={board.rows} /></article>)}</div> : <Empty text="板块或题材端点暂未返回足够候选" />}</section>}
+    {tab === "候选" && <section className="asd-panel"><div className="asd-title"><div><span className="asd-kicker">UNTOUCHED LIMIT-UP POTENTIAL</span><h2>强势板块潜在涨停候选</h2><p className="asd-title-note">仅展示当前未涨停、当日从未触板、距涨停不超过8%的可交易股票。</p></div><Source>{data?.boardCandidates?.length ? "东方财富板块成分 + 腾讯行情" : "同花顺题材归因 + 腾讯行情"}</Source></div>{candidateBoards.length ? <div className="asd-board-grid">{candidateBoards.map((board) => <article key={board.code + "-" + board.name}><h3>{board.name}<small>{board.code}</small></h3><StockRows rows={board.rows} /></article>)}</div> : <Empty text="当前没有满足未触板条件的潜在涨停候选" />}</section>}
 
     <footer className="asd-footer"><span>{data?.meta?.filters || "沪深主板 · 35元以下 · 排除ST"}</span><span>数据仅供量化研究，不构成投资建议</span></footer>
   </main>;

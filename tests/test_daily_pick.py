@@ -118,6 +118,21 @@ def test_hard_filters_do_not_force_five_candidates():
     assert result["watch"] == []
 
 
+def test_excludes_limit_up_pool_current_limit_and_intraday_touch():
+    good = row("600001", "通信")
+    in_limit_pool = row("600002", "通信")
+    at_limit = row("000001", "电力") | {"price": 11.00, "pct": 7.0, "high": 11.00}
+    touched_then_opened = row("002001", "消费") | {"high": 11.00}
+    too_far = row("603001", "机械") | {"price": 10.10, "pct": 1.0}
+    snapshot = healthy_snapshot([good, in_limit_pool, at_limit, touched_then_opened, too_far])
+    snapshot["pools"]["limit_up"] = [{"code": "600002"}]
+    result = build_daily_pick(snapshot, at(9, 35), {"600001": bars()})
+    assert [item["code"] for item in result["core"]] == ["600001"]
+    assert result["watch"] == []
+    assert result["core"][0]["untouchedAtSelection"] is True
+    assert 0 < result["core"][0]["distanceToLimit"] <= 8
+
+
 def test_same_day_state_is_reused_and_only_live_price_changes(tmp_path):
     snapshot = healthy_snapshot([row("600001", "通信", 95), row("000001", "电力", 90)])
     first = resolve_daily_pick(snapshot, at(9, 35), tmp_path, {"600001": bars(), "000001": bars()})
