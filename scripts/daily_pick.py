@@ -280,6 +280,9 @@ def build_daily_pick(snapshot: dict[str, Any], now: datetime, minute_bars: dict[
     errors = source_errors(snapshot)
     if errors:
         return _empty(now, "source_error", "关键数据不可用：" + "、".join(errors))
+    validation = snapshot.get("marketValidation") or {}
+    if validation and not validation.get("allowRecommendations", False):
+        return _empty(now, "source_error", "市场验证未通过：" + str(validation.get("summary") or "关键行情无法确认"))
     ranked = rank_candidates(snapshot)
     selected: list[dict[str, Any]] = []
     per_sector: Counter[str] = Counter()

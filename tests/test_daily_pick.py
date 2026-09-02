@@ -125,6 +125,15 @@ def test_unhealthy_sources_never_create_a_pick():
     assert "热点股实时行情" in result["message"]
 
 
+def test_red_market_validation_never_creates_a_pick():
+    snapshot = healthy_snapshot([row("600001", "通信")])
+    snapshot["marketValidation"] = {"allowRecommendations": False, "summary": "快照已经过期"}
+    result = build_daily_pick(snapshot, at(9, 35), {"600001": bars()})
+    assert result["status"] == "source_error"
+    assert result["core"] == []
+    assert "市场验证未通过" in result["message"]
+
+
 def test_hard_filters_do_not_force_five_candidates():
     good = row("600001", "通信")
     too_expensive = row("600002", "通信") | {"price": 36}

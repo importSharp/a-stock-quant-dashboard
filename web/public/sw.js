@@ -1,4 +1,4 @@
-const CACHE = "a-stock-data-console-v4";
+const CACHE = "a-stock-data-console-v5";
 const SHELL = ["/manifest.webmanifest", "/favicon.svg"];
 
 self.addEventListener("install", (event) => {

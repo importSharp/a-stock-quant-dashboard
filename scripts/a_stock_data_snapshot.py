@@ -30,6 +30,7 @@ from intraday_skill_analysis import (
     tencent_quotes,
     ths_hot,
 )
+from market_validation import validate_market
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -139,6 +140,7 @@ def main() -> int:
                 "vol_ratio": quote.get("vol_ratio", 0),
                 "amount_yi": round(float(quote.get("amount_wan", 0)) / 10000, 2),
                 "open": quote.get("open", 0), "high": quote.get("high", 0), "low": quote.get("low", 0),
+                "last_close": quote.get("last_close", 0),
                 "limit_up": quote.get("limit_up", 0), "limit_down": quote.get("limit_down", 0),
             })
     result["news"] = {
@@ -208,6 +210,7 @@ def main() -> int:
                 "price": quote.get("price") or row.get("price"),
                 "pct": quote.get("change_pct", row.get("pct", 0)),
                 "open": quote.get("open", 0), "high": quote.get("high", 0), "low": quote.get("low", 0),
+                "last_close": quote.get("last_close", 0),
                 "limit_up": quote.get("limit_up", 0), "limit_down": quote.get("limit_down", 0),
                 "turnover": quote.get("turnover_pct") or row.get("turnover", 0),
                 "vol_ratio": quote.get("vol_ratio") or row.get("vol_ratio", 0),
@@ -243,6 +246,7 @@ def main() -> int:
         lambda: tencent_quotes(confirmed_codes), {},
     ) if confirmed_codes else {}
     result["confirmedPicks"] = build_confirmed_strength_pool(pools, confirmed_quotes)
+    result["marketValidation"] = validate_market(result, datetime.now().astimezone())
 
     state_dir = ROOT / "data" / "runtime"
     state_path = state_dir / f"daily-pick-{now:%Y%m%d}.json"
