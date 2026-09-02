@@ -377,6 +377,11 @@ body { font-size: 15px; }
 .daily-picks-title > div:last-child strong { color: #ff7464; font: 700 23px "Roboto Mono",Consolas,monospace; }
 .daily-picks-title > div:last-child span { color: #85939e; font-size: 9px; }
 .daily-picks-title > div:last-child i { color: #53616b; font-style: normal; }
+.daily-pool-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 5px; border: 1px solid rgba(255,255,255,.09); border-radius: 12px; background: rgba(0,0,0,.16); }
+.daily-pool-tabs button { display: grid; grid-template-columns: auto auto; align-items: center; gap: 7px; min-height: 43px; padding: 7px 11px; border: 0; border-radius: 8px; background: transparent; color: #84939e; cursor: pointer; }
+.daily-pool-tabs button.active { background: rgba(85,214,244,.14); color: white; box-shadow: inset 0 0 0 1px rgba(85,214,244,.2); }
+.daily-pool-tabs strong { color: var(--cyan); font: 800 18px "Roboto Mono",Consolas,monospace; }
+.daily-pool-tabs span { font-size: 9px; white-space: nowrap; }
 .daily-picks-grid { display: grid; grid-template-columns: minmax(0,1.08fr) minmax(0,.92fr); gap: 12px; }
 .daily-picks-rail { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .daily-pick-card { min-width: 0; padding: 15px; border: 1px solid rgba(255,255,255,.09); border-radius: 13px; background: rgba(255,255,255,.045); }
@@ -404,6 +409,7 @@ body { font-size: 15px; }
 .daily-levels span { color: #778791; font-size: 7px; }
 .daily-levels strong { overflow: hidden; font: 700 10px "Roboto Mono",Consolas,monospace; white-space: nowrap; }
 .daily-levels .warn strong { color: #ffc35d; }
+.daily-levels .profit strong, .confirmed-levels .profit strong { color: #73e0b2; }
 .daily-levels .risk strong { color: #ff7d70; }
 .daily-pick-card ul { display: grid; gap: 5px; margin: 11px 0; padding: 0; list-style: none; }
 .daily-pick-card li { position: relative; padding-left: 11px; color: #9eabb4; font-size: 8px; line-height: 1.45; }
@@ -423,6 +429,23 @@ body { font-size: 15px; }
 .daily-empty aside { display: flex; align-items: center; gap: 13px; padding: 16px 18px; border: 1px solid rgba(255,255,255,.09); border-radius: 12px; background: rgba(0,0,0,.16); }
 .daily-empty aside strong { color: var(--cyan); font: 800 28px "Roboto Mono",Consolas,monospace; }
 .daily-empty aside span { color: #8c9aa4; font-size: 9px; line-height: 1.5; }
+.confirmed-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.confirmed-card { padding: 16px; border: 1px solid rgba(255,255,255,.09); border-radius: 13px; background: rgba(255,255,255,.045); }
+.confirmed-card.sealed { box-shadow: inset 3px 0 #ff6253; }
+.confirmed-card.broken { box-shadow: inset 3px 0 #ffc35d; }
+.confirmed-card > header { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; }
+.confirmed-card > header > span { padding: 6px 8px; border-radius: 6px; background: rgba(255,98,83,.14); color: #ff8d80; font-size: 8px; font-weight: 800; }
+.confirmed-card.broken > header > span { background: rgba(255,195,93,.13); color: #ffd27f; }
+.confirmed-card h3 { display: flex; gap: 7px; margin: 0; font-size: 15px; }
+.confirmed-card h3 small { color: var(--cyan); font: 9px "Roboto Mono",Consolas,monospace; }
+.confirmed-card header p { margin: 3px 0 0; color: #7f8e99; font-size: 8px; }
+.confirmed-card header > strong { color: #ff7464; font: 800 16px "Roboto Mono",Consolas,monospace; }
+.confirmed-action { margin: 12px 0 9px; padding: 9px 10px; border-radius: 8px; background: rgba(0,0,0,.18); color: #aab6be; font-size: 9px; }
+.confirmed-levels { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1px; overflow: hidden; border: 1px solid rgba(255,255,255,.08); border-radius: 9px; background: rgba(255,255,255,.08); }
+.confirmed-levels > div { display: grid; gap: 4px; padding: 9px; background: #131d25; }
+.confirmed-levels span { color: #778791; font-size: 7px; }
+.confirmed-levels strong { color: white; font: 700 10px "Roboto Mono",Consolas,monospace; }
+.confirmed-levels .risk strong { color: #ff7d70; }
 
 @media (max-width: 1050px) {
   .daily-picks-grid { grid-template-columns: 1fr; }
@@ -431,6 +454,8 @@ body { font-size: 15px; }
   .daily-picks { padding: 17px; border-radius: 14px; }
   .daily-picks-title, .daily-empty { align-items: flex-start; flex-direction: column; }
   .daily-picks-title > div:last-child, .daily-empty aside { width: 100%; }
+  .daily-pool-tabs { width: 100%; box-sizing: border-box; }
+  .confirmed-grid { grid-template-columns: 1fr; }
   .daily-picks-rail { grid-template-columns: 1fr; }
   .daily-pick-card, .daily-pick-card.lead { padding: 16px; }
   .daily-picks-rail .daily-pick-card ul { display: grid; }

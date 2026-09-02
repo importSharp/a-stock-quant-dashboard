@@ -173,11 +173,63 @@ def calculate_price_levels(row: dict[str, Any], bars: list[dict[str, Any]] | Non
     limit_up = _number(row.get("limit_up"), _number(row.get("price")) * 1.1)
     chase_cap = max(zone_high + .01, min(_number(row.get("price")) * 1.03, opening_high * 1.02, limit_up * .97))
     invalidation = min(opening_low * .995, _number(row.get("open"), opening_low) * .98)
+    target_basis = (zone_low + zone_high) / 2
+    take_profit_low = max(breakout, target_basis * 1.03)
+    take_profit_high = max(take_profit_low, target_basis * 1.06)
+    if limit_up > 0:
+        take_profit_low = min(take_profit_low, limit_up)
+        take_profit_high = min(take_profit_high, limit_up)
     return {
         "zoneLow": round(zone_low, 2), "zoneHigh": round(zone_high, 2),
         "breakout": round(breakout, 2), "chaseCap": round(chase_cap, 2),
         "invalidation": round(invalidation, 2), "priceSource": source, "degraded": degraded,
+        "takeProfitLow": round(take_profit_low, 2), "takeProfitHigh": round(take_profit_high, 2),
+        "exitTiming": "下一交易日起执行；若买入当日触价，仅记录不卖出",
     }
+
+
+def build_confirmed_strength_pool(
+    pools: dict[str, list[dict[str, Any]]], quotes: dict[str, dict[str, Any]], top_each: int = 4,
+) -> list[dict[str, Any]]:
+    """Build an execution-aware reference view for sealed and broken limit-up stocks."""
+    output: list[dict[str, Any]] = []
+    for kind, label in (("limit_up", "封板"), ("broken", "炸板")):
+        rows = list(pools.get(kind) or [])
+        rows.sort(key=lambda row: (-int(_number(row.get("limit_days"), 1)), -_number(row.get("pct")), -_number(row.get("seal_fund"))))
+        for row in rows[:top_each]:
+            code = str(row.get("code") or "")
+            quote = quotes.get(code) or {}
+            price = _number(quote.get("price"), _number(row.get("price")))
+            if not MAIN_BOARD.fullmatch(code) or price <= 0 or price > 35:
+                continue
+            open_price = _number(quote.get("open"), price)
+            limit_up = _number(quote.get("limit_up"), price)
+            if kind == "limit_up":
+                buy_low, buy_high = price * .985, price * 1.005
+                buy_label = "次日重新确认区"
+                action = "封板中不排队；下一交易日开盘后再确认承接"
+            else:
+                buy_low = max(min(open_price, price), price * .985)
+                buy_high = min(limit_up * .99, max(price, open_price) * 1.01)
+                buy_high = max(buy_low, buy_high)
+                buy_label = "回封观察区"
+                action = "炸板高风险；仅重新转强时观察，不在下跌中接回"
+            basis = (buy_low + buy_high) / 2
+            output.append({
+                "kind": kind, "signal": label, "code": code,
+                "name": str(quote.get("name") or row.get("name") or ""),
+                "sector": str(row.get("industry") or "主板"), "price": round(price, 2),
+                "changePct": _number(quote.get("change_pct"), _number(row.get("pct"))),
+                "limitDays": int(_number(row.get("limit_days"), 1)),
+                "breakTimes": int(_number(row.get("break_times"))), "action": action,
+                "plan": {
+                    "buyLabel": buy_label, "buyLow": round(buy_low, 2), "buyHigh": round(buy_high, 2),
+                    "takeProfitLow": round(basis * 1.03, 2), "takeProfitHigh": round(basis * 1.06, 2),
+                    "invalidation": round(buy_low * .97, 2),
+                    "exitTiming": "下一交易日起执行",
+                },
+            })
+    return output
 
 
 def _live_state(price: float, levels: dict[str, Any]) -> str:

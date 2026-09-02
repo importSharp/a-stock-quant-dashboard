@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { DailyPicks, type DailyPick } from "./DailyPicks";
+import { DailyPicks, type ConfirmedPick, type DailyPick } from "./DailyPicks";
 
 type AnyRow = Record<string, any>;
 type Snapshot = {
@@ -17,6 +17,7 @@ type Snapshot = {
   themeCandidates: { name: string; code: string; source: string; rows: AnyRow[] }[];
   hot: AnyRow[];
   dailyPick?: DailyPick;
+  confirmedPicks?: ConfirmedPick[];
 };
 
 const tabs = ["竞价", "盘中", "板块", "候选"] as const;
@@ -122,7 +123,7 @@ export function AStockDataDashboard() {
     </header>
 
     <section className="asd-contract">
-      <div className="asd-hero-copy"><span className="asd-kicker">FOUR CORE WORKSPACES</span><h2>只看最影响交易的，<em>四组实时信号。</em></h2><p>9:15～9:25集合竞价、盘中涨停与炸板、强势板块排名、每个强势板块未触板候选前10。</p><div className="asd-hero-tags"><span>沪深主板</span><span>价格 ≤ 35</span><span>排除 ST / 退市</span><span>排除涨停 / 炸板</span></div></div>
+      <div className="asd-hero-copy"><span className="asd-kicker">FOUR CORE WORKSPACES</span><h2>只看最影响交易的，<em>四组实时信号。</em></h2><p>9:15～9:25集合竞价、盘中涨停与炸板、强势板块排名、每个强势板块未触板候选前10。</p><div className="asd-hero-tags"><span>沪深主板</span><span>价格 ≤ 35</span><span>排除 ST / 退市</span><span>已触板 / 未触板双池</span></div></div>
       <div className="asd-live-summary">
         <div><small>涨停</small><strong className="up">{data?.sentiment?.limitUp ?? "—"}</strong><span>只</span></div>
         <div><small>炸板率</small><strong>{data?.sentiment?.breakRate ?? "—"}</strong><span>%</span></div>
@@ -131,7 +132,7 @@ export function AStockDataDashboard() {
       </div>
     </section>
 
-    <DailyPicks pick={data?.dailyPick} asOf={data?.meta?.asOf} />
+    <DailyPicks pick={data?.dailyPick} confirmed={data?.confirmedPicks} asOf={data?.meta?.asOf} />
 
     {error ? <div className="asd-alert">{error}</div> : null}
     {failures.length ? <details className="asd-alert warn"><summary><strong>{failures.length} 个端点暂不可用</strong><span>点击查看</span></summary><div>{failures.map((item) => <span key={item.key}>{item.label}：{item.error}</span>)}</div></details> : null}

@@ -12,7 +12,13 @@ from pathlib import Path
 import re
 from typing import Any, Callable
 
-from daily_pick import is_untouched_limit_candidate, market_phase, rank_candidates, resolve_daily_pick
+from daily_pick import (
+    build_confirmed_strength_pool,
+    is_untouched_limit_candidate,
+    market_phase,
+    rank_candidates,
+    resolve_daily_pick,
+)
 from intraday_skill_analysis import (
     board_candidates,
     board_fund_flow,
@@ -54,7 +60,7 @@ def main() -> int:
             "version": "3.7.1",
             "asOf": now.isoformat(timespec="seconds"),
             "policy": "仅使用 a-stock-data 文档内端点；失败不使用旧缓存补位",
-            "filters": "沪深主板 · 非ST/退市 · 候选价≤35元 · 未涨停",
+            "filters": "沪深主板 · 非ST/退市 · 候选价≤35元 · 已触板/未触板双池独立展示",
         },
         "endpointStatus": [],
         "capabilities": CAPABILITIES,
@@ -228,6 +234,15 @@ def main() -> int:
         "limitDown": len(pools.get("limit_down") or []),
         "maxHeight": max((int(row.get("limit_days") or 0) for row in up), default=0),
     }
+
+    confirmed_codes = list(dict.fromkeys(
+        str(row.get("code")) for row in (up[:8] + broken[:8]) if row.get("code")
+    ))
+    confirmed_quotes = collect(
+        "confirmedQuotes", "已触板强势股行情", "腾讯行情",
+        lambda: tencent_quotes(confirmed_codes), {},
+    ) if confirmed_codes else {}
+    result["confirmedPicks"] = build_confirmed_strength_pool(pools, confirmed_quotes)
 
     state_dir = ROOT / "data" / "runtime"
     state_path = state_dir / f"daily-pick-{now:%Y%m%d}.json"

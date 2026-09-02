@@ -4,6 +4,7 @@ from datetime import datetime
 import json
 
 from scripts.daily_pick import (
+    build_confirmed_strength_pool,
     build_daily_pick,
     calculate_price_levels,
     market_phase,
@@ -77,6 +78,26 @@ def test_price_levels_use_opening_volume_weighted_typical_price():
     assert levels["invalidation"] < levels["zoneLow"]
     assert levels["breakout"] >= 10.40
     assert levels["chaseCap"] < 11.00
+    assert levels["takeProfitLow"] <= levels["takeProfitHigh"] <= 11.00
+    assert "下一交易日" in levels["exitTiming"]
+
+
+def test_confirmed_pool_keeps_sealed_and_broken_separate_with_trade_plans():
+    pools = {
+        "limit_up": [{"code": "600001", "name": "封板股", "price": 11, "pct": 10, "industry": "通信", "limit_days": 2}],
+        "broken": [{"code": "000001", "name": "炸板股", "price": 10.7, "pct": 7, "industry": "电力", "break_times": 2}],
+    }
+    quotes = {
+        "600001": {"name": "封板股", "price": 11, "open": 10.4, "change_pct": 10, "limit_up": 11},
+        "000001": {"name": "炸板股", "price": 10.7, "open": 10.3, "change_pct": 7, "limit_up": 11},
+    }
+    result = build_confirmed_strength_pool(pools, quotes)
+    assert [item["signal"] for item in result] == ["封板", "炸板"]
+    assert result[0]["plan"]["buyLabel"] == "次日重新确认区"
+    assert "不排队" in result[0]["action"]
+    assert result[1]["plan"]["buyLabel"] == "回封观察区"
+    assert all(item["plan"]["takeProfitLow"] < item["plan"]["takeProfitHigh"] for item in result)
+    assert all("下一交易日" in item["plan"]["exitTiming"] for item in result)
 
 
 def test_builds_three_core_and_two_watch_with_sector_cap():
